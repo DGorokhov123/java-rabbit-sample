@@ -30,6 +30,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <faker.version>1.0.2</faker.version>
     </properties>
 
 
@@ -42,6 +43,12 @@
                 <groupId>ru.dgorokhov</groupId>
                 <artifactId>common</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.javafaker</groupId>
+                <artifactId>javafaker</artifactId>
+                <version>${faker.version}</version>
             </dependency>
 
         </dependencies>

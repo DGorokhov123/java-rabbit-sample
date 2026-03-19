@@ -1,0 +1,37 @@
+info:
+  app:
+    name: user-service
+    description: Sample RabbitMQ App
+    version: 1.0-SNAPSHOT
+  company:
+    name: Somekind Software
+
+logging:
+  level:
+    ru.dgorokhov: DEBUG
+    org.springframework.web: INFO
+    org.springframework.validation: INFO
+
+management:
+  endpoints.web.exposure.include: health,info,metrics
+  endpoint.health.show-details: always
+  metrics.export.prometheus.enabled: true
+  info.env.enabled: true
+
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clidb
+    username: cliuser
+    password: veryverysecretword
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate.ddl-auto: update
+    properties.hibernate.format_sql: false
+

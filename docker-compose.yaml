@@ -1,0 +1,18 @@
+services:
+
+  db:
+    image: postgres:17-alpine
+    container_name: hibenate-cli-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=clidb
+      - POSTGRES_USER=cliuser
+      - POSTGRES_PASSWORD=veryverysecretword
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      interval: 10s
+      timeout: 5s
+      retries: 5
