@@ -16,3 +16,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: mrrabbit
+      RABBITMQ_DEFAULT_PASS: veryverysecretword
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:v1.29.4
+    container_name: mailpit
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Management UI
+    restart: unless-stopped
+

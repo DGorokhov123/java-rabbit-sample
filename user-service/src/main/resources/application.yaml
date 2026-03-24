@@ -8,6 +8,7 @@ info:
 
 logging:
   level:
+    root: INFO
     ru.dgorokhov: DEBUG
     org.springframework.web: INFO
     org.springframework.validation: INFO
@@ -34,4 +35,26 @@ spring:
     show-sql: true
     hibernate.ddl-auto: update
     properties.hibernate.format_sql: false
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: mrrabbit
+    password: veryverysecretword
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 5
+          initial-interval: 2s
+        concurrency: 3
+        max-concurrency: 10
+        prefetch: 1
+        declare: true
+      template:
+        exchange: events.exchange
+
+app:
+  properties:
+    notification-fanout: user.events.fanout
+    echo-queue-postfix: echo.queue
 

@@ -31,6 +31,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <faker.version>1.0.2</faker.version>
+        <protobuf.version>4.33.6</protobuf.version>
+        <protobuf.maven.plugin.version>5.0.2</protobuf.maven.plugin.version>
     </properties>
 
 
@@ -51,6 +53,20 @@
                 <version>${faker.version}</version>
             </dependency>
 
+            <!-- PROTOBUF -->
+
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -64,6 +80,12 @@
 <!--                    <artifactId>maven-compiler-plugin</artifactId>-->
 <!--                    <version>${maven-compiler-plugin.version}</version>-->
 <!--                </plugin>-->
+
+                <plugin>
+                    <groupId>io.github.ascopes</groupId>
+                    <artifactId>protobuf-maven-plugin</artifactId>
+                    <version>${protobuf.maven.plugin.version}</version>
+                </plugin>
 
             </plugins>
         </pluginManagement>

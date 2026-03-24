@@ -1,7 +1,10 @@
 package ru.dgorokhov.service;
 
+import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -14,7 +17,12 @@ import ru.dgorokhov.dto.UserUpdateDto;
 import ru.dgorokhov.exception.CustomValidationException;
 import ru.dgorokhov.exception.NotFoundException;
 import ru.dgorokhov.mapper.UserMapper;
+import ru.dgorokhov.proto.user.UserActionTypeProto;
+import ru.dgorokhov.proto.user.UserNotificationProto;
+import ru.dgorokhov.rabbit.RabbitMessageSender;
+import ru.dgorokhov.rabbit.UserNotificationEvent;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +32,8 @@ import java.util.Objects;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RabbitMessageSender rabbitMessageSender;
+    private final ApplicationEventPublisher eventPublisher;
 
     /*
     Все юзеры в виде листа dto
@@ -79,7 +89,9 @@ public class UserService {
             user.setAge(userUpdateDto.getAge());
         }
 
-        return UserMapper.toDto(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+        eventPublisher.publishEvent(UserMapper.toUpdateNotificationEvent(savedUser));
+        return UserMapper.toDto(savedUser);
     }
 
     /*
@@ -89,8 +101,11 @@ public class UserService {
     public boolean delete(Long id) {
         if (id == null || id < 1) throw new CustomValidationException("id should not be null or negative or zero");
 
-        if (!userRepository.existsById(id)) throw new NotFoundException("Not found User " + id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not found User " + id));
+        UserNotificationEvent event = UserMapper.toDeleteNotificationEvent(user);
         userRepository.deleteById(id);
+        eventPublisher.publishEvent(event);
         return true;
     }
 
@@ -102,7 +117,9 @@ public class UserService {
         if (userCreateDto == null) throw new CustomValidationException("dto should not be null");
 
         User user = UserMapper.fromDto(userCreateDto);
-        return UserMapper.toDto(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+        eventPublisher.publishEvent(UserMapper.toCreateNotificationEvent(savedUser));
+        return UserMapper.toDto(savedUser);
     }
 
     /*

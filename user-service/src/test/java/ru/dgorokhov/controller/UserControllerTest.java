@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -17,6 +20,7 @@ import ru.dgorokhov.dal.UserRepository;
 import ru.dgorokhov.dto.UserCreateDto;
 import ru.dgorokhov.dto.UserUpdateDto;
 import ru.dgorokhov.exception.GlobalExceptionHandler;
+import ru.dgorokhov.rabbit.RabbitMessageSender;
 import ru.dgorokhov.service.UserService;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -52,17 +56,23 @@ class UserControllerTest {
             .version(1L)
             .build();
 
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
+    private final Faker faker = new Faker();
+
     private MockMvc mockMvc;
 
     @Mock
     private UserRepository userRepository;
 
-    private final JsonMapper jsonMapper = JsonMapper.builder().build();
-    private final Faker faker = new Faker();
+    @Mock
+    private RabbitMessageSender rabbitMessageSender;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @BeforeEach
     void setUp() {
-        UserService userService = new UserService(userRepository);
+        UserService userService = new UserService(userRepository, rabbitMessageSender, eventPublisher);
         UserController userController = new UserController(userService);
 
         mockMvc = MockMvcBuilders
@@ -265,28 +275,28 @@ class UserControllerTest {
     @Test
     @DisplayName("Удаление существующего пользователя")
     void testDelete_UserExists() throws Exception {
-        when(userRepository.existsById(testUser.getId()))
-                .thenReturn(true);
+        when(userRepository.findById(testUser.getId()))
+                .thenReturn(Optional.of(testUser));
 
         mockMvc.perform(delete("/users/" + testUser.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        verify(userRepository).existsById(testUser.getId());
+        verify(userRepository).findById(testUser.getId());
         verify(userRepository).deleteById(testUser.getId());
     }
 
     @Test
     @DisplayName("Удаление несуществующего пользователя")
     void testDelete_NotFound() throws Exception {
-        when(userRepository.existsById(1L))
-                .thenReturn(false);
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.empty());
 
         mockMvc.perform(delete("/users/1"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
 
-        verify(userRepository).existsById(1L);
+        verify(userRepository).findById(1L);
         verify(userRepository, never()).deleteById(1L);
     }
 
