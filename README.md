@@ -1,4 +1,4 @@
-# REST API Service на чистом Spring без Boot 
+# Модульное приложение на Spring Boot с шиной на RabbitMQ
 
 user-service - web приложение на Java, использующее Spring Data JPA для взаимодействия с PostgreSQL 
 Приложение поддерживает базовые операции CRUD (Create, Read, Update, Delete) над сущностью User.
