@@ -41,3 +41,4 @@ build/
 /postgres/
 amplicode.xml
 /rabbitmq/
+/.qwen/
