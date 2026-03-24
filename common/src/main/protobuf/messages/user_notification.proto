@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package message.user.action;
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "ru.dgorokhov.proto.user";
+
+// messages
+
+message UserNotificationProto {
+  int64 user_id = 1;
+  string user_email = 2;
+  string user_name = 3;
+  UserActionTypeProto action_type = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+
+enum UserActionTypeProto {
+  USER_ACTION_CREATE = 0;
+  USER_ACTION_UPDATE = 1;
+  USER_ACTION_DELETE = 2;
+}
