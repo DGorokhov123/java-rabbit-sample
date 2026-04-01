@@ -42,7 +42,7 @@ public class UserController {
             @PositiveOrZero(message = "Номер страницы должен быть неотрицательным")
             Integer page
     ) {
-        return userService.findAll(size, page);
+        return userService.findAll(size, page).getContent();
     }
 
     /*

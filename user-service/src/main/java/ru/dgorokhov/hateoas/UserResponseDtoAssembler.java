@@ -1,6 +1,7 @@
 package ru.dgorokhov.hateoas;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -74,39 +75,47 @@ public class UserResponseDtoAssembler implements RepresentationModelAssembler<Us
         return model;
     }
 
-    public PagedModel<EntityModel<UserResponseDto>> toPagedModel(
-            List<UserResponseDto> dtos,
-            Integer size,
-            Integer page
-    ) {
-        List<EntityModel<UserResponseDto>> models = dtos.stream()
-                .map(this::toModelWithBasicLinks)
-                .toList();
-        PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, dtos.size());
+    public PagedModel<EntityModel<UserResponseDto>> toPagedModel(Page<UserResponseDto> page) {
+
+        List<EntityModel<UserResponseDto>> models = page.map(this::toModelWithBasicLinks).toList();
+
+        PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(
+                page.getSize(),           // размер страницы
+                page.getNumber(),         // номер страницы (0-based)
+                page.getTotalElements(),  // общее количество элементов
+                page.getTotalPages()      // общее количество страниц
+        );
+
         PagedModel<EntityModel<UserResponseDto>> pagedModel = PagedModel.of(models, metadata);
 
         pagedModel.add(
-                linkTo(methodOn(UserHateoasController.class).findAll(size, page))
+                linkTo(methodOn(UserHateoasController.class).findAll(page.getSize(), page.getNumber()))
                         .withSelfRel()
                         .withTitle("Ссылка на данную выборку")
         );
 
         pagedModel.add(
-                linkTo(methodOn(UserHateoasController.class).findAll(size, 0))
+                linkTo(methodOn(UserHateoasController.class).findAll(page.getSize(), 0))
                         .withRel("first")
                         .withTitle("Ссылка первую страницу")
         );
 
-        if (page > 0) pagedModel.add(
-                linkTo(methodOn(UserHateoasController.class).findAll(size, page - 1))
+        if (page.hasPrevious()) pagedModel.add(
+                linkTo(methodOn(UserHateoasController.class).findAll(page.getSize(), page.getNumber() - 1))
                         .withRel("prev")
                         .withTitle("Ссылка на предыдущую страницу")
         );
 
-        if (dtos.size() == size) pagedModel.add(
-                linkTo(methodOn(UserHateoasController.class).findAll(size, page + 1))
+        if (page.hasNext()) pagedModel.add(
+                linkTo(methodOn(UserHateoasController.class).findAll(page.getSize(), page.getNumber() + 1))
                         .withRel("next")
                         .withTitle("Ссылка на следующую страницу")
+        );
+
+        pagedModel.add(
+                linkTo(methodOn(UserHateoasController.class).findAll(page.getSize(), page.getTotalPages() - 1))
+                        .withRel("last")
+                        .withTitle("Ссылка на последнюю страницу")
         );
 
         return pagedModel;

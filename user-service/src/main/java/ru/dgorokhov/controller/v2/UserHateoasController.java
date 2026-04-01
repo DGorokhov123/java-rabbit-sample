@@ -38,7 +38,7 @@ public class UserHateoasController {
     Все юзеры в виде листа dto
      */
     @GetMapping("/all")
-    @Operation(description = "Найти всех пользователей. Возвращает List<UserResponseDto> постранично")
+    @Operation(description = "Найти всех пользователей. Возвращает PagedModel<EntityModel<UserResponseDto>> постранично с HATEOAS-ссылками")
     public PagedModel<EntityModel<UserResponseDto>> findAll(
             @Parameter(description = "Размер выдачи на 1 странице", required = false, example = "20")
             @RequestParam(name = "size", defaultValue = "20")
@@ -50,15 +50,14 @@ public class UserHateoasController {
             @PositiveOrZero(message = "Номер страницы должен быть неотрицательным")
             Integer page
     ) {
-        List<UserResponseDto> dtos = userService.findAll(size, page);
-        return assembler.toPagedModel(dtos, size, page);
+        return assembler.toPagedModel(userService.findAll(size, page));
     }
 
     /*
     Возвращает dto по id
      */
     @GetMapping("/{id}")
-    @Operation(description = "Найти пользователя по ID. Возвращает UserResponseDto для найденного пользователя")
+    @Operation(description = "Найти пользователя по ID. Возвращает EntityModel<UserResponseDto> с HATEOAS-ссылками")
     public EntityModel<UserResponseDto> findById(
             @PathVariable(name = "id") @Positive Long id
     ) {
@@ -71,7 +70,7 @@ public class UserHateoasController {
     Возвращает измененное dto
      */
     @PutMapping
-    @Operation(description = "Обновляет данные конкретного пользователя. Возвращает UserResponseDto с обновленными данными пользователя")
+    @Operation(description = "Обновляет данные конкретного пользователя. Возвращает EntityModel<UserResponseDto> с HATEOAS-ссылками")
     public EntityModel<UserResponseDto> update(
             @RequestBody @Valid UserUpdateDto userUpdateDto
     ) {
@@ -80,10 +79,10 @@ public class UserHateoasController {
     }
 
     /*
-    Удаляет пользователя по id. Возвращает true при успешном удалении
+    Удаляет пользователя по id. Возвращает результат с HATEOAS-ссылками
      */
     @DeleteMapping("/{id}")
-    @Operation(description = "Удаляет пользователя по ID. Возвращает true если пользователь успешно удален")
+    @Operation(description = "Удаляет пользователя по ID. Возвращает EntityModel<Map<String, String>> с результатом и HATEOAS-ссылками")
     public EntityModel<Map<String, String>> delete(
             @PathVariable(name = "id") @Positive Long id
     ) {
@@ -100,7 +99,7 @@ public class UserHateoasController {
     Добавляет пользователя по dto и возвращает добавленного
      */
     @PostMapping
-    @Operation(description = "Создает нового пользователя. Возвращает UserResponseDto с данными созданного пользователя")
+    @Operation(description = "Создает нового пользователя. Возвращает EntityModel<UserResponseDto> с HATEOAS-ссылками")
     public EntityModel<UserResponseDto> create(
             @RequestBody @Valid UserCreateDto userCreateDto
     ) {
@@ -109,10 +108,10 @@ public class UserHateoasController {
     }
 
     /*
-    Проверяет пользователя по id. Возвращает true если существует, либо false
+    Проверяет пользователя по id. Возвращает результат с HATEOAS-ссылками
      */
     @GetMapping("/check/{id}")
-    @Operation(description = "Проверяет существование пользователя по ID. Возвращает true если пользователь существует, иначе false")
+    @Operation(description = "Проверяет существование пользователя по ID. Возвращает EntityModel<Map<String, String>> с результатом и HATEOAS-ссылками")
     public EntityModel<Map<String, String>> existsById(
             @PathVariable(name = "id") @Positive Long id
     ) {
@@ -132,7 +131,7 @@ public class UserHateoasController {
     Возвращает пользователя по email
      */
     @GetMapping("/email/{email}")
-    @Operation(description = "Найти пользователя по Email. Возвращает UserResponseDto для найденного пользователя")
+    @Operation(description = "Найти пользователя по Email. Возвращает EntityModel<UserResponseDto> с HATEOAS-ссылками")
     public EntityModel<UserResponseDto> findByEmail(
             @PathVariable(name = "email") @NotNull @NotBlank @Email String email
     ) {

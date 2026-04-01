@@ -47,6 +47,13 @@
             <artifactId>protobuf-java-util</artifactId>
         </dependency>
 
+        <!-- API DOCS -->
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-scalar</artifactId>
+        </dependency>
+
     </dependencies>
 
 

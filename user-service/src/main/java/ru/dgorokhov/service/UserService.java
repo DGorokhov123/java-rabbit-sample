@@ -1,9 +1,7 @@
 package ru.dgorokhov.service;
 
-import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,12 +15,9 @@ import ru.dgorokhov.dto.UserUpdateDto;
 import ru.dgorokhov.exception.CustomValidationException;
 import ru.dgorokhov.exception.NotFoundException;
 import ru.dgorokhov.mapper.UserMapper;
-import ru.dgorokhov.proto.user.UserActionTypeProto;
-import ru.dgorokhov.proto.user.UserNotificationProto;
 import ru.dgorokhov.rabbit.RabbitMessageSender;
 import ru.dgorokhov.rabbit.UserNotificationEvent;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,16 +34,12 @@ public class UserService {
     Все юзеры в виде листа dto
      */
     @Transactional(readOnly = true)
-    public List<UserResponseDto> findAll(Integer size, Integer page) {
+    public Page<UserResponseDto> findAll(Integer size, Integer page) {
         if (size == null || size < 1) throw new CustomValidationException("size should not be null or less then 1");
         if (page == null || page < 0) throw new CustomValidationException("size should not be null or negative");
 
         Page<User> users = userRepository.findAll(PageRequest.of(page, size));
-        if (users.isEmpty()) return List.of();
-
-        return users.stream()
-                .map(UserMapper::toDto)
-                .toList();
+        return users.map(UserMapper::toDto);
     }
 
     /*
