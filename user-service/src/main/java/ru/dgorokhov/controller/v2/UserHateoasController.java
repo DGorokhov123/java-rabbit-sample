@@ -17,7 +17,6 @@ import ru.dgorokhov.dto.UserUpdateDto;
 import ru.dgorokhov.hateoas.UserResponseDtoAssembler;
 import ru.dgorokhov.service.UserService;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
