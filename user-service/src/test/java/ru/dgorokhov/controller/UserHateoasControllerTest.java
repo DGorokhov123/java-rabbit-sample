@@ -1,24 +1,24 @@
 package ru.dgorokhov.controller;
 
 import com.github.javafaker.Faker;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.dgorokhov.controller.v1.UserController;
+import ru.dgorokhov.controller.v2.UserHateoasController;
 import ru.dgorokhov.dal.User;
 import ru.dgorokhov.dal.UserRepository;
 import ru.dgorokhov.dto.UserCreateDto;
 import ru.dgorokhov.dto.UserUpdateDto;
-import ru.dgorokhov.exception.GlobalExceptionHandler;
+import ru.dgorokhov.hateoas.UserResponseDtoAssembler;
 import ru.dgorokhov.rabbit.RabbitMessageSender;
 import ru.dgorokhov.service.UserService;
 import tools.jackson.databind.json.JsonMapper;
@@ -32,10 +32,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class UserControllerTest {
+@WebMvcTest(UserHateoasController.class)
+@Import({UserService.class, UserResponseDtoAssembler.class})
+class UserHateoasControllerTest {
 
     private final User testUser = User.builder()
             .id(1L)
@@ -58,27 +60,17 @@ class UserControllerTest {
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
     private final Faker faker = new Faker();
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private UserRepository userRepository;
 
-    @Mock
+    @MockitoBean
     private RabbitMessageSender rabbitMessageSender;
 
-    @Mock
+    @MockitoBean
     private ApplicationEventPublisher eventPublisher;
-
-    @BeforeEach
-    void setUp() {
-        UserService userService = new UserService(userRepository, rabbitMessageSender, eventPublisher);
-        UserController userController = new UserController(userService);
-
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(userController)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-    }
 
     // ==================== ПОЗИТИВНЫЕ СЦЕНАРИИ ====================
 
@@ -88,13 +80,13 @@ class UserControllerTest {
         when(userRepository.findAll(PageRequest.of(0, 20)))
                 .thenReturn(new PageImpl<>(List.of(testUser, testUser2)));
 
-        mockMvc.perform(get("/v1/users/all"))
+        mockMvc.perform(get("/v2/users/all").accept(MediaTypes.HAL_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id").value(testUser.getId()))
-                .andExpect(jsonPath("$[0].name").value(testUser.getName()))
-                .andExpect(jsonPath("$[0].email").value(testUser.getEmail()));
+                .andExpect(jsonPath("$._embedded.userResponseDtoList", hasSize(2)))
+                .andExpect(jsonPath("$._embedded.userResponseDtoList[0].id").value(testUser.getId()))
+                .andExpect(jsonPath("$._embedded.userResponseDtoList[0].name").value(testUser.getName()))
+                .andExpect(jsonPath("$._embedded.userResponseDtoList[0].email").value(testUser.getEmail()));
 
         verify(userRepository).findAll(PageRequest.of(0, 20));
     }
@@ -105,10 +97,10 @@ class UserControllerTest {
         when(userRepository.findAll(PageRequest.of(0, 20)))
                 .thenReturn(new PageImpl<>(List.of()));
 
-        mockMvc.perform(get("/v1/users/all"))
+        mockMvc.perform(get("/v2/users/all"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$._embedded").doesNotExist());
 
         verify(userRepository).findAll(PageRequest.of(0, 20));
     }
@@ -119,7 +111,7 @@ class UserControllerTest {
         when(userRepository.findById(testUser.getId()))
                 .thenReturn(Optional.of(testUser));
 
-        mockMvc.perform(get("/v1/users/" + testUser.getId()))
+        mockMvc.perform(get("/v2/users/" + testUser.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testUser.getId()))
@@ -136,7 +128,7 @@ class UserControllerTest {
         when(userRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/v1/users/1"))
+        mockMvc.perform(get("/v2/users/1"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
 
@@ -149,7 +141,7 @@ class UserControllerTest {
         when(userRepository.findByEmail(testUser.getEmail()))
                 .thenReturn(Optional.of(testUser));
 
-        mockMvc.perform(get("/v1/users/email/" + testUser.getEmail()))
+        mockMvc.perform(get("/v2/users/email/" + testUser.getEmail()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testUser.getId()))
@@ -166,7 +158,7 @@ class UserControllerTest {
         when(userRepository.findByEmail(testUser.getEmail()))
                 .thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/v1/users/email/" + testUser.getEmail()))
+        mockMvc.perform(get("/v2/users/email/" + testUser.getEmail()))
                 .andDo(print())
                 .andExpect(status().isNotFound());
 
@@ -186,7 +178,7 @@ class UserControllerTest {
                 .thenReturn(testUser);
 
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(userCreateDto))
                 )
@@ -205,7 +197,7 @@ class UserControllerTest {
     void testCreate_NullDto() throws Exception {
 
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(null))
                 )
@@ -242,7 +234,7 @@ class UserControllerTest {
                 .build();
 
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(userUpdateDto))
                 )
@@ -260,7 +252,7 @@ class UserControllerTest {
     @DisplayName("Обновление пользователя с DTO = null")
     void testUpdate_NullDto() throws Exception {
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(null))
                 )
@@ -277,7 +269,7 @@ class UserControllerTest {
         when(userRepository.findById(testUser.getId()))
                 .thenReturn(Optional.of(testUser));
 
-        mockMvc.perform(delete("/v1/users/" + testUser.getId()))
+        mockMvc.perform(delete("/v2/users/" + testUser.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
 
@@ -291,7 +283,7 @@ class UserControllerTest {
         when(userRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
-        mockMvc.perform(delete("/v1/users/1"))
+        mockMvc.perform(delete("/v2/users/1"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
 
@@ -305,10 +297,10 @@ class UserControllerTest {
         when(userRepository.existsById(testUser.getId()))
                 .thenReturn(true);
 
-        mockMvc.perform(get("/v1/users/check/" + testUser.getId()))
+        mockMvc.perform(get("/v2/users/check/" + testUser.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+                .andExpect(jsonPath("$.result").value("true"));
 
         verify(userRepository).existsById(testUser.getId());
     }
@@ -319,10 +311,10 @@ class UserControllerTest {
         when(userRepository.existsById(testUser.getId()))
                 .thenReturn(false);
 
-        mockMvc.perform(get("/v1/users/check/" + testUser.getId()))
+        mockMvc.perform(get("/v2/users/check/" + testUser.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string("false"));
+                .andExpect(jsonPath("$.result").value("false"));
 
         verify(userRepository).existsById(testUser.getId());
     }
@@ -332,7 +324,7 @@ class UserControllerTest {
     void testCreateValidation_Name() throws Exception {
         // Blank
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -348,7 +340,7 @@ class UserControllerTest {
 
         // null
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -364,7 +356,7 @@ class UserControllerTest {
 
         // too long
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -386,7 +378,7 @@ class UserControllerTest {
     void testCreateValidation_Email() throws Exception {
         // blank
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -402,7 +394,7 @@ class UserControllerTest {
 
         // null
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -418,7 +410,7 @@ class UserControllerTest {
 
         // invalid
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -434,7 +426,7 @@ class UserControllerTest {
 
         // missing @
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -456,7 +448,7 @@ class UserControllerTest {
     void testCreateValidation_Age() throws Exception {
         // negative
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -472,7 +464,7 @@ class UserControllerTest {
 
         // zero
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -488,7 +480,7 @@ class UserControllerTest {
 
         // too large
         mockMvc.perform(
-                        post("/v1/users")
+                        post("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserCreateDto.builder()
@@ -510,7 +502,7 @@ class UserControllerTest {
     void testUpdateValidation_ID() throws Exception {
         // null
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -524,7 +516,7 @@ class UserControllerTest {
 
         // negative
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -545,7 +537,7 @@ class UserControllerTest {
     void testUpdateValidation_Name() throws Exception {
         // too long
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -566,7 +558,7 @@ class UserControllerTest {
     void testUpdateValidation_Email() throws Exception {
         // invalid
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -581,7 +573,7 @@ class UserControllerTest {
 
         // missing @
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -602,7 +594,7 @@ class UserControllerTest {
     void testUpdateValidation_Age() throws Exception {
         // negative
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -617,7 +609,7 @@ class UserControllerTest {
 
         // zero
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -632,7 +624,7 @@ class UserControllerTest {
 
         // too old
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
@@ -652,7 +644,7 @@ class UserControllerTest {
     @DisplayName("Обновление пользователя - валидации аннотации @AtLeastOneNotNull")
     void testUpdate_DtoWithNullFields() throws Exception {
         mockMvc.perform(
-                        put("/v1/users")
+                        put("/v2/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(jsonMapper.writeValueAsString(
                                         UserUpdateDto.builder()
