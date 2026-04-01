@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.dgorokhov.dto.SendEmailRequestDto;
 import ru.dgorokhov.dto.SendEmailResponseDto;
-import ru.dgorokhov.model.UserEventNotification;
 import ru.dgorokhov.sender.NotificationChannel;
 import ru.dgorokhov.sender.NotificationDto;
 import ru.dgorokhov.sender.NotificationSenderAsyncExecutor;

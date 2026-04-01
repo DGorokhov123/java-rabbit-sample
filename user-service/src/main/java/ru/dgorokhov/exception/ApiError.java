@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
@@ -13,7 +14,7 @@ import java.time.Instant;
 @Builder
 @Schema(description = "Универсальное сообщение об ошибке")
 
-public class ApiError {
+public class ApiError extends RepresentationModel<ApiError> {
 
     @Schema(
             description = "Дата и время ошибки",

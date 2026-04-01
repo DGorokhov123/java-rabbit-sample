@@ -18,7 +18,6 @@ import ru.dgorokhov.mapper.UserMapper;
 import ru.dgorokhov.rabbit.RabbitMessageSender;
 import ru.dgorokhov.rabbit.UserNotificationEvent;
 
-import java.util.List;
 import java.util.Objects;
 
 @Slf4j

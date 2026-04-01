@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,8 +14,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.dgorokhov.controller.v2.UserHateoasController;
 
 import java.time.Instant;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Slf4j
 @RestControllerAdvice
@@ -24,13 +29,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFoundException(NotFoundException e, HttpServletRequest request) {
         log.debug("Not found: {}", e.getMessage());
-        return ApiError.builder()
+        ApiError apiError = ApiError.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.NOT_FOUND)
                 .error("Not Found")
                 .message(e.getMessage())
                 .path(request.getRequestURI())
                 .build();
+        return withLinks(apiError, request);
     }
 
     @ExceptionHandler({
@@ -55,13 +61,14 @@ public class GlobalExceptionHandler {
         }
 
         log.debug("VALIDATION FAILED: {}", errorMessage);
-        return ApiError.builder()
+        ApiError apiError = ApiError.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.BAD_REQUEST)
                 .error("Validation Failed")
                 .message(errorMessage)
                 .path(request.getRequestURI())
                 .build();
+        return withLinks(apiError, request);
     }
 
     @ExceptionHandler({
@@ -70,13 +77,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleIllegalArgument(DataIntegrityViolationException e, HttpServletRequest request) {
         log.debug("DATA CONFLICT: {}", e.getMessage());
-        return ApiError.builder()
+        ApiError apiError = ApiError.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.CONFLICT)
                 .error("Data constraints violated")
                 .message(e.getMessage())
                 .path(request.getRequestURI())
                 .build();
+        return withLinks(apiError, request);
     }
 
     @ExceptionHandler({
@@ -88,26 +96,46 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleIllegalArgument(Exception e, HttpServletRequest request) {
         log.debug("ILLEGAL ARGUMENT: {}", e.getMessage());
-        return ApiError.builder()
+        ApiError apiError = ApiError.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.BAD_REQUEST)
                 .error("Illegal Argument")
                 .message(e.getMessage())
                 .path(request.getRequestURI())
                 .build();
+        return withLinks(apiError, request);
     }
 
     @ExceptionHandler(CustomValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleCustomValidationException(CustomValidationException e, HttpServletRequest request) {
         log.debug("Invalid request has passed controller validation, fix it!: {}", e.getMessage());
-        return ApiError.builder()
+        ApiError apiError = ApiError.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.BAD_REQUEST)
                 .error("Invalid request has passed controller validation, fix it!")
                 .message(e.getMessage())
                 .path(request.getRequestURI())
                 .build();
+        return withLinks(apiError, request);
+    }
+
+    private ApiError withLinks(ApiError apiError, HttpServletRequest request) {
+        if (request.getRequestURI().contains("/v2/")) {
+            apiError.add(
+                    Link.of("/scalar")
+                            .withRel("scalar")
+                            .withTitle("OpenAPI документация")
+            );
+
+            apiError.add(
+                    linkTo(methodOn(UserHateoasController.class).findAll(20, 0))
+                            .withRel("users")
+                            .withTitle("Список пользователей, ссылка на 1 страницу")
+            );
+
+        }
+        return apiError;
     }
 
 }
