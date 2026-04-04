@@ -53,6 +53,12 @@ spring:
       template:
         exchange: events.exchange
 
+springdoc:
+  api-docs:
+    enabled: true
+scalar:
+  enabled: true
+
 app:
   properties:
     notification-fanout: user.events.fanout

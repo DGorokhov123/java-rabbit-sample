@@ -1,9 +1,9 @@
 package ru.dgorokhov.mapper;
 
-import ru.dgorokhov.proto.user.UserActionTypeProto;
-import ru.dgorokhov.proto.user.UserNotificationProto;
 import ru.dgorokhov.model.UserEventNotification;
 import ru.dgorokhov.model.UserEventType;
+import ru.dgorokhov.proto.user.UserActionTypeProto;
+import ru.dgorokhov.proto.user.UserNotificationProto;
 
 import java.time.Instant;
 

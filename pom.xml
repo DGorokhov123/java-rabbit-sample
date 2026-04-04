@@ -34,6 +34,7 @@
         <protobuf.version>4.33.6</protobuf.version>
         <protobuf.maven.plugin.version>5.0.2</protobuf.maven.plugin.version>
         <testcontainers.version>1.21.4</testcontainers.version>
+        <openapi.starter.version>3.0.2</openapi.starter.version>
     </properties>
 
 
@@ -66,6 +67,14 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java-util</artifactId>
                 <version>${protobuf.version}</version>
+            </dependency>
+
+            <!-- API DOC -->
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-scalar</artifactId>
+                <version>${openapi.starter.version}</version>
             </dependency>
 
             <!-- TESTCONTAINERS -->
