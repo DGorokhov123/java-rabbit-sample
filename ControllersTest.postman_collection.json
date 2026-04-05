@@ -1503,12 +1503,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8081/email",
+              "raw": "http://localhost:8080/email",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8081",
+              "port": "8080",
               "path": [
                 "email"
               ]
