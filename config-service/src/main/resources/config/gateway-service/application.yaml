@@ -1,0 +1,35 @@
+management:
+  endpoints.web.exposure.include: health,info,metrics,gateway
+  endpoint.health.show-details: always
+  endpoint.gateway.access: read-only
+  prometheus.metrics.export.enabled: true
+  info.env.enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: TRACE
+
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+
+            - id: user_service
+              uri: lb://user-service
+              predicates:
+                - Path=
+                  /v1/users/**,
+                  /v2/users/**
+
+            - id: notification_service
+              uri: lb://notification-service
+              predicates:
+                - Path=
+                  /email/**
