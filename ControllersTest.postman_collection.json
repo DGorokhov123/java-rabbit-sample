@@ -1503,14 +1503,443 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8081/email",
+              "raw": "http://localhost:8080/email",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8081",
+              "port": "8080",
               "path": [
                 "email"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "cb test",
+      "item": [
+        {
+          "name": "Circuit Breaker 1 should be CLOSED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"State is CLOSED\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.circuitState).to.equal('CLOSED');\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 4",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 7",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 8",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker 9 should be OPEN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 500, 502, 503, 504\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 502, 503, 504]);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Ответ является валидным JSON\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Тело ответа — object\r",
+                  "pm.test(\"Response body is an object\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"State is OPEN\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.circuitState).to.equal('OPEN');\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/cbtest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "cbtest"
               ]
             }
           },

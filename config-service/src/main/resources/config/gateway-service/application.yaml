@@ -1,0 +1,68 @@
+management:
+  endpoints.web.exposure.include: health,info,metrics,gateway
+  endpoint.health.show-details: always
+  endpoint.gateway.access: read-only
+  prometheus.metrics.export.enabled: true
+  info.env.enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: TRACE
+
+server:
+  port: 8080
+  shutdown: graceful
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 20                     # за сколько последних запросов считаем статистику
+        failureRateThreshold: 50                  # % ошибок, при котором цепь открывается
+        minimumNumberOfCalls: 10                  # минимум вызовов, чтобы начать считать failure rate
+        waitDurationInOpenState: 20s                          # сколько времени цепь остаётся открытой
+        permittedNumberOfCallsInHalfOpenState: 5              # сколько тестовых запросов в half-open
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 2s                         # запросы дольше 2 сек считаются slow
+    instances:
+      userCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 40
+      notificationCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 60
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+
+            - id: user_service
+              uri: lb://user-service
+              predicates:
+                - Path=
+                  /v1/users/**,
+                  /v2/users/**,
+                  /cbtest/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userCircuitBreaker
+                    statusCodes: 500, 502, 503, 504
+                    fallbackUri: forward:/fallback/user-service
+
+            - id: notification_service
+              uri: lb://notification-service
+              predicates:
+                - Path=/email/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: notificationCircuitBreaker
+                    statusCodes: 500, 502, 503, 504
+                    fallbackUri: forward:/fallback/notification-service

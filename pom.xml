@@ -22,6 +22,9 @@
         <module>common</module>
         <module>user-service</module>
         <module>notification-service</module>
+        <module>gateway-service</module>
+        <module>discovery-service</module>
+        <module>config-service</module>
     </modules>
 
     <properties>
@@ -35,6 +38,7 @@
         <protobuf.maven.plugin.version>5.0.2</protobuf.maven.plugin.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <openapi.starter.version>3.0.2</openapi.starter.version>
+        <spring-cloud-dependencies.version>2025.1.1</spring-cloud-dependencies.version>
     </properties>
 
 
@@ -67,6 +71,16 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java-util</artifactId>
                 <version>${protobuf.version}</version>
+            </dependency>
+
+            <!-- CLOUD DEPENDENCIES -->
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- API DOC -->
