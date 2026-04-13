@@ -1,4 +1,4 @@
-package ru.dgorokhov.dto;
+package ru.dgorokhov.dto.notification;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

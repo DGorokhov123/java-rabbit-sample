@@ -1,4 +1,4 @@
-package ru.dgorokhov.dto;
+package ru.dgorokhov.dto.notification;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

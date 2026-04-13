@@ -15,8 +15,8 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.dgorokhov.dto.SendEmailRequestDto;
-import ru.dgorokhov.dto.SendEmailResponseDto;
+import ru.dgorokhov.dto.notification.SendEmailRequestDto;
+import ru.dgorokhov.dto.notification.SendEmailResponseDto;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;

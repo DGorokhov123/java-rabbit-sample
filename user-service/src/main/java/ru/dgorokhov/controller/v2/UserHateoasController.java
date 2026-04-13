@@ -11,9 +11,9 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.dgorokhov.dto.UserCreateDto;
-import ru.dgorokhov.dto.UserResponseDto;
-import ru.dgorokhov.dto.UserUpdateDto;
+import ru.dgorokhov.dto.user.UserCreateDto;
+import ru.dgorokhov.dto.user.UserResponseDto;
+import ru.dgorokhov.dto.user.UserUpdateDto;
 import ru.dgorokhov.hateoas.UserResponseDtoAssembler;
 import ru.dgorokhov.service.UserService;
 

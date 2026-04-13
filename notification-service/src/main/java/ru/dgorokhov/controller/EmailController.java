@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.dgorokhov.dto.SendEmailRequestDto;
-import ru.dgorokhov.dto.SendEmailResponseDto;
+import ru.dgorokhov.dto.notification.SendEmailRequestDto;
+import ru.dgorokhov.dto.notification.SendEmailResponseDto;
 import ru.dgorokhov.service.EmailService;
 
 import java.util.UUID;
