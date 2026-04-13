@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: tester-app
+  cloud:
+    config:
+      enabled: false
+  main:
+    web-application-type: none
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: mrrabbit
+    password: veryverysecretword
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 5
+          initial-interval: 2s
+        concurrency: 3
+        max-concurrency: 10
+        prefetch: 1
+        declare: true
+
+eureka:
+  client:
+    registerWithEureka: false
+    fetch-registry: true
+    should-enforce-fetch-registry-at-init: false
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+app:
+  properties:
+    notification-fanout: user.events.fanout
+    notification-queue-postfix: tester.queue
