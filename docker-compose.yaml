@@ -43,3 +43,97 @@ services:
       - "8025:8025"   # Management UI
     restart: unless-stopped
 
+  discovery-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: discovery-service
+    container_name: discovery-service
+    restart: unless-stopped
+    environment:
+      - eureka.instance.hostname=discovery-service
+
+  config-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: config-service
+    restart: unless-stopped
+    depends_on:
+      - discovery-service
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/
+      - eureka.instance.hostname=config-service
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: gateway-service
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - discovery-service
+      - config-service
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/
+      - eureka.instance.hostname=gateway-service
+      - server.port=8080
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: user-service
+    restart: unless-stopped
+    depends_on:
+      - discovery-service
+      - config-service
+      - gateway-service
+      - db
+      - rabbitmq
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/
+      - eureka.instance.hostname=user-service
+      - spring.datasource.url=jdbc:postgresql://db:5432/clidb
+      - spring.rabbitmq.host=rabbitmq
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: notification-service
+    restart: unless-stopped
+    depends_on:
+      - discovery-service
+      - config-service
+      - gateway-service
+      - db
+      - rabbitmq
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/
+      - eureka.instance.hostname=notification-service
+      - spring.rabbitmq.host=rabbitmq
+      - app.email.provider=javamail
+      - spring.mail.host=mailpit
+
+  tester-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: tester-app
+    restart: no
+    depends_on:
+      - discovery-service
+      - config-service
+      - gateway-service
+      - db
+      - rabbitmq
+      - user-service
+      - notification-service
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://discovery-service:8761/eureka/
+      - eureka.instance.hostname=tester-app
+      - spring.rabbitmq.host=rabbitmq
+      - app.mail-url=http://mailpit:8025
