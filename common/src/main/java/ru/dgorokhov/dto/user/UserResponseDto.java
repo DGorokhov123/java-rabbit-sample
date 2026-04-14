@@ -1,4 +1,4 @@
-package ru.dgorokhov.dto;
+package ru.dgorokhov.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

@@ -16,8 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.dgorokhov.controller.v2.UserHateoasController;
 import ru.dgorokhov.dal.User;
 import ru.dgorokhov.dal.UserRepository;
-import ru.dgorokhov.dto.UserCreateDto;
-import ru.dgorokhov.dto.UserUpdateDto;
+import ru.dgorokhov.dto.user.UserCreateDto;
+import ru.dgorokhov.dto.user.UserUpdateDto;
 import ru.dgorokhov.hateoas.UserResponseDtoAssembler;
 import ru.dgorokhov.rabbit.RabbitMessageSender;
 import ru.dgorokhov.service.UserService;
@@ -47,7 +47,8 @@ class UserHateoasControllerTest {
             .createdAt(Instant.now())
             .version(0L)
             .build();
-
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
+    private final Faker faker = new Faker();
     User testUser2 = User.builder()
             .id(2L)
             .name("Jane Doe")
@@ -56,10 +57,6 @@ class UserHateoasControllerTest {
             .createdAt(Instant.now())
             .version(1L)
             .build();
-
-    private final JsonMapper jsonMapper = JsonMapper.builder().build();
-    private final Faker faker = new Faker();
-
     @Autowired
     private MockMvc mockMvc;
 

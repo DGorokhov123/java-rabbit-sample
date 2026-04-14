@@ -7,7 +7,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import ru.dgorokhov.controller.v2.UserHateoasController;
-import ru.dgorokhov.dto.UserResponseDto;
+import ru.dgorokhov.dto.user.UserResponseDto;
 
 import java.util.List;
 

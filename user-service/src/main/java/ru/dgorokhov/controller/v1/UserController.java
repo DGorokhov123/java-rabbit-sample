@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.dgorokhov.dto.UserCreateDto;
-import ru.dgorokhov.dto.UserResponseDto;
-import ru.dgorokhov.dto.UserUpdateDto;
+import ru.dgorokhov.dto.user.UserCreateDto;
+import ru.dgorokhov.dto.user.UserResponseDto;
+import ru.dgorokhov.dto.user.UserUpdateDto;
 import ru.dgorokhov.service.UserService;
 
 import java.util.List;
