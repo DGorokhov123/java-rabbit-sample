@@ -1,0 +1,11 @@
+
+server:
+  port: 0
+  shutdown: graceful
+
+spring:
+  application:
+    name: user-service
+  cloud:
+    config:
+      enabled: false

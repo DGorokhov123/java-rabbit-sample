@@ -47,7 +47,8 @@ class UserHateoasControllerTest {
             .createdAt(Instant.now())
             .version(0L)
             .build();
-
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
+    private final Faker faker = new Faker();
     User testUser2 = User.builder()
             .id(2L)
             .name("Jane Doe")
@@ -56,10 +57,6 @@ class UserHateoasControllerTest {
             .createdAt(Instant.now())
             .version(1L)
             .build();
-
-    private final JsonMapper jsonMapper = JsonMapper.builder().build();
-    private final Faker faker = new Faker();
-
     @Autowired
     private MockMvc mockMvc;
 

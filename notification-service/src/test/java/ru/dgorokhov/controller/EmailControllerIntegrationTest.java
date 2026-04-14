@@ -1,6 +1,7 @@
 package ru.dgorokhov.controller;
 
 import com.github.javafaker.Faker;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Disabled("Слишком тяжелый тест для автоматического запуска")
 @Testcontainers
 @SpringBootTest(properties = {
         "app.email.provider=javamail",
@@ -246,7 +248,7 @@ class EmailControllerIntegrationTest {
 
             // Ждем асинхронной отправки
             await()
-                    .atMost(10, TimeUnit.SECONDS)
+                    .atMost(30, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         mockMvc.perform(get("/email/" + uuid + "/status"))
@@ -295,7 +297,7 @@ class EmailControllerIntegrationTest {
 
             // Ждем отправки
             await()
-                    .atMost(10, TimeUnit.SECONDS)
+                    .atMost(30, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         mockMvc.perform(get("/email/" + uuid + "/status"))

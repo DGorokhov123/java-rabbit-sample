@@ -37,6 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
+    private final Faker faker = new Faker();
+
     private final User testUser = User.builder()
             .id(1L)
             .name("John Doe")
@@ -46,7 +49,7 @@ class UserControllerTest {
             .version(0L)
             .build();
 
-    User testUser2 = User.builder()
+    private final User testUser2 = User.builder()
             .id(2L)
             .name("Jane Doe")
             .email("jane@example.com")
@@ -54,9 +57,6 @@ class UserControllerTest {
             .createdAt(Instant.now())
             .version(1L)
             .build();
-
-    private final JsonMapper jsonMapper = JsonMapper.builder().build();
-    private final Faker faker = new Faker();
 
     private MockMvc mockMvc;
 
