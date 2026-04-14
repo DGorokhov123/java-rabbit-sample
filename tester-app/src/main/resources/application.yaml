@@ -36,3 +36,4 @@ app:
   properties:
     notification-fanout: user.events.fanout
     notification-queue-postfix: tester.queue
+  mail-url: http://localhost:8025

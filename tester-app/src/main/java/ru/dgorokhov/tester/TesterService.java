@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import ru.dgorokhov.config.AppProperties;
 import ru.dgorokhov.dto.user.UserCreateDto;
 import ru.dgorokhov.dto.user.UserResponseDto;
 import ru.dgorokhov.proto.user.UserNotificationProto;
@@ -27,7 +28,7 @@ public class TesterService {
 
     private final DiscoveryClient discoveryClient;
     private final ApplicationContext context;
-    private final RestClient restClient;
+    private final AppProperties appProperties;
     private final RabbitMessageListener rabbitMessageListener;
     private final Faker faker = new Faker();
 
@@ -44,19 +45,21 @@ public class TesterService {
                 System.out.println("OK");
                 break;
             }
-            Thread.sleep(100);
+            Thread.sleep(600);
             if (counter++ > 100) exitWithMessage("ОШИБКА: CONFIG-SERVICE недоступен");
         }
 
         System.out.print("Ждем запуска GATEWAY-SERVICE ... ");
         counter = 0;
+        String gatewayUrl;
         while (true) {
             List<ServiceInstance> instances = discoveryClient.getInstances("gateway-service");
             if (!instances.isEmpty()) {
-                System.out.println("OK");
+                gatewayUrl = instances.get(0).getUri().toString();
+                System.out.println("OK, получен URL " + gatewayUrl);
                 break;
             }
-            Thread.sleep(100);
+            Thread.sleep(600);
             if (counter++ > 100) exitWithMessage("ОШИБКА: GATEWAY-SERVICE недоступен");
         }
 
@@ -68,7 +71,7 @@ public class TesterService {
                 System.out.println("OK");
                 break;
             }
-            Thread.sleep(100);
+            Thread.sleep(600);
             if (counter++ > 100) exitWithMessage("ОШИБКА: USER-SERVICE недоступен");
         }
 
@@ -80,11 +83,16 @@ public class TesterService {
                 System.out.println("OK");
                 break;
             }
-            Thread.sleep(100);
+            Thread.sleep(600);
             if (counter++ > 100) exitWithMessage("ОШИБКА: NOTIFICATION-SERVICE недоступен");
         }
 
         System.out.print("\nUSER-SERVICE: отправляем запрос на создание юзера ... ");
+
+        RestClient restClient = RestClient.builder()
+                .baseUrl(gatewayUrl)
+                .defaultHeader("Accept", "application/json")
+                .build();
 
         UserCreateDto userCreateDto = UserCreateDto.builder()
                 .name(faker.name().fullName())
@@ -120,14 +128,14 @@ public class TesterService {
         System.out.print("MAILPIT: проверяем сообщение в почте ... ");
 
         RestClient mailPitClient = RestClient.builder()
-                .baseUrl("http://localhost:8025")
+                .baseUrl(appProperties.getMailUrl())
                 .defaultHeader("Accept", "application/json")
                 .build();
 
         counter = 0;
         while (true) {
-            ResponseEntity<String> mailPitResponse = restClient.get()
-                    .uri("http://localhost:8025/api/v1/messages")
+            ResponseEntity<String> mailPitResponse = mailPitClient.get()
+                    .uri("/api/v1/messages")
                     .retrieve()
                     .toEntity(String.class);
 
